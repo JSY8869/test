@@ -144,17 +144,13 @@ question_encoder.add(Embedding(input_dim=vocab_size,
                                output_dim=embed_size,
                                input_length=question_max_len))
 question_encoder.add(Dropout(dropout_rate))
-# 결과 : (samples, question_max_len, embedding_dim) / 샘플의 수, 질문의 최대 길이, 임베딩 벡터의 차원
-# 실질적인 임베딩 과정
+
+
 input_encoded_m = input_encoder_m(input_sequence)
 input_encoded_c = input_encoder_c(input_sequence)
 question_encoded = question_encoder(question)
 
-# print('Input encoded m', input_encoded_m)
-# print('Input encoded c', input_encoded_c)
-# print('Question encoded', question_encoded)
-# 스토리 단어들과 질문 단어들 간의 유사도를 구하는 과정
-# 유사도는 내적을 사용한다.
+
 match = dot([input_encoded_m, question_encoded], axes=-1, normalize=False)
 match = Activation('softmax')(match)
 print('Match shape', match)
