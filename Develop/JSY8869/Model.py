@@ -211,8 +211,8 @@ print(model.summary())
 # print("{:18}|{:5}|{}".format("질문", "실제값", "예측값"))
 # print(39 * "-")
 
-# for i in range(NUM_DISPLAY):
-#     question = " ".join([idx2word[x] for x in Xqtest[i].tolist()])
-#     label = idx2word[ytest[i]]
-#     prediction = idx2word[ytest_[i]]
-#     print("{:20}: {:6} {}".format(question, label, prediction))
+for i in range(NUM_DISPLAY):
+    question = " ".join([idx2word[x] for x in Xqtest[i].tolist()])
+    label = idx2word[ytest[i]]
+    prediction = idx2word[ytest_[i]]
+    print("{:20}: {:6} {}".format(question, label, prediction))
