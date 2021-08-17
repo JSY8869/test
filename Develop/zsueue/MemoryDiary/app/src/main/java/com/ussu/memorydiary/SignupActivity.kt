@@ -36,36 +36,40 @@ class SignupActivity : AppCompatActivity() {
         var id = idEditText.text.toString()
         var pw = pwEditText.text.toString()
 
-        if (id.length == 0) { //id를 입력하지 않은 경우
-            Toast.makeText(view.context, "id를 입력해주세요", Toast.LENGTH_LONG).show()
-        } else if (pw.length == 0) { //password를 입력하지 않은 경우
-            Toast.makeText(view.context, "password를 입력해주세요", Toast.LENGTH_LONG).show()
-        } else { //회원가입 성공
-            //서버로 id, pw 전달
-            val BASE_URL = "http://192.168.0.104:5000"
+        when {
+            id.isEmpty() -> { //id를 입력하지 않은 경우
+                Toast.makeText(view.context, "id를 입력해주세요", Toast.LENGTH_LONG).show()
+            }
+            pw.isEmpty() -> { //password를 입력하지 않은 경우
+                Toast.makeText(view.context, "password를 입력해주세요", Toast.LENGTH_LONG).show()
+            }
+            else -> { //회원가입 성공
+                //서버로 id, pw 전달
+                val BASE_URL = "http://192.168.0.107:8080"
 
-            var gson = GsonBuilder()
-                .setLenient()
-                .create()
+                var gson = GsonBuilder()
+                    .setLenient()
+                    .create()
 
-            val retrofit = Builder()
-                .baseUrl(BASE_URL)
-                .addConverterFactory(GsonConverterFactory.create(gson))
-                .build()
+                val retrofit = Builder()
+                    .baseUrl(BASE_URL)
+                    .addConverterFactory(GsonConverterFactory.create(gson))
+                    .build()
 
-            val api = retrofit.create(API::class.java)
-            val callSaveMemberInfo = api.saveMemberInfo(memberInfo("$id", "$pw"))
+                val api = retrofit.create(API::class.java)
+                val callSaveMemberInfo = api.saveMemberInfo(memberInfo(id, pw))
 
-            callSaveMemberInfo.enqueue(object : Callback<memberInfo> {
-                override fun onResponse(call: Call<memberInfo>, response: Response<memberInfo>) {
-                    Toast.makeText(view.context, "회원가입 성공!", Toast.LENGTH_LONG).show()
-                    Log.d(ContentValues.TAG, "성공: ${response.raw()}")
-                }
+                callSaveMemberInfo.enqueue(object : Callback<memberInfo> {
+                    override fun onResponse(call: Call<memberInfo>, response: Response<memberInfo>) {
+                        Toast.makeText(view.context, "회원가입 성공!", Toast.LENGTH_LONG).show()
+                        Log.d(ContentValues.TAG, "성공: ${response.raw()}")
+                    }
 
-                override fun onFailure(call: Call<memberInfo>, t: Throwable) {
-                    Log.d(ContentValues.TAG, "실패: $t")
-                }
-            })
+                    override fun onFailure(call: Call<memberInfo>, t: Throwable) {
+                        Log.d(ContentValues.TAG, "실패: $t")
+                    }
+                })
+            }
         }
 
     }
