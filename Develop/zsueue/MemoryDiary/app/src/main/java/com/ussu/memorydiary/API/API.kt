@@ -3,6 +3,9 @@ package com.ussu.memorydiary.API
 import retrofit2.Call
 import retrofit2.http.*
 
+/**
+ * diary API, member API 나눠서 작성바람
+ */
 interface API {
 
 //    @GET("/diary/Read")
@@ -15,6 +18,9 @@ interface API {
     ): Call<textInfo>
 
     //일기 수정
+    /**
+     * 수정 요함 -> PATCH 에서 PUT,POST
+     */
     @FormUrlEncoded
     @PATCH("/diary/Update/{memberId}")
     fun editDiaryText(
