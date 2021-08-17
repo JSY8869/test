@@ -35,9 +35,9 @@ interface API {
     ): Call<memberInfo>
 
     //로그인 시 id, pw 가져오기
-    @GET("/login/Read/{memberId}")
+    @GET("/login/Read")
     fun readMemberInfo(
-        @Path("memberId") member_id: String,
+        @Query("memberId") member_id: String,
     ): Call<memberInfo>
 
     //질문, 정답 가져오기

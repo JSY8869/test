@@ -41,8 +41,6 @@ class SignupActivity : AppCompatActivity() {
         } else if (pw.length == 0) { //password를 입력하지 않은 경우
             Toast.makeText(view.context, "password를 입력해주세요", Toast.LENGTH_LONG).show()
         } else { //회원가입 성공
-            Toast.makeText(view.context, "회원가입 성공!", Toast.LENGTH_LONG).show()
-
             //서버로 id, pw 전달
             val BASE_URL = "http://192.168.0.104:5000"
 
@@ -56,10 +54,11 @@ class SignupActivity : AppCompatActivity() {
                 .build()
 
             val api = retrofit.create(API::class.java)
-            val callSaveMemberInfo = api.saveMemberInfo(memberInfo(id, pw))
+            val callSaveMemberInfo = api.saveMemberInfo(memberInfo("$id", "$pw"))
 
             callSaveMemberInfo.enqueue(object : Callback<memberInfo> {
                 override fun onResponse(call: Call<memberInfo>, response: Response<memberInfo>) {
+                    Toast.makeText(view.context, "회원가입 성공!", Toast.LENGTH_LONG).show()
                     Log.d(ContentValues.TAG, "성공: ${response.raw()}")
                 }
 
