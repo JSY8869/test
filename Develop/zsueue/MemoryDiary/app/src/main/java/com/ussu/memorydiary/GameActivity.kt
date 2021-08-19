@@ -1,21 +1,10 @@
 package com.ussu.memorydiary
 
-import android.content.ContentValues
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.EditText
 import android.widget.Toast
-import com.google.gson.GsonBuilder
-import com.ussu.memorydiary.API.API
-import com.ussu.memorydiary.API.memberInfo
-import com.ussu.memorydiary.API.questionInfo
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 
 class GameActivity : AppCompatActivity() {
     private lateinit var AnswerEditText: EditText

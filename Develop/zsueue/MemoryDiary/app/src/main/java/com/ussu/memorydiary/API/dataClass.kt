@@ -10,7 +10,8 @@ data class textInfo(
 //회원가입, 로그인
 data class memberInfo(
     var member_id: String,
-    var member_password: String
+    var member_password: String,
+    var score: Int
 )
 
 //질문, 답

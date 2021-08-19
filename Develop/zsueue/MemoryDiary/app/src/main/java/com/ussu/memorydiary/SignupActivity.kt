@@ -9,7 +9,7 @@ import android.view.View
 import android.widget.EditText
 import android.widget.Toast
 import com.google.gson.GsonBuilder
-import com.ussu.memorydiary.API.API
+import com.ussu.memorydiary.API.memberAPI
 import com.ussu.memorydiary.API.memberInfo
 import retrofit2.Call
 import retrofit2.Callback
@@ -35,6 +35,7 @@ class SignupActivity : AppCompatActivity() {
         //회원가입
         var id = idEditText.text.toString()
         var pw = pwEditText.text.toString()
+        var score = 0
 
         when {
             id.isEmpty() -> { //id를 입력하지 않은 경우
@@ -56,12 +57,16 @@ class SignupActivity : AppCompatActivity() {
                     .addConverterFactory(GsonConverterFactory.create(gson))
                     .build()
 
-                val api = retrofit.create(API::class.java)
-                val callSaveMemberInfo = api.saveMemberInfo(memberInfo(id, pw))
+                val api = retrofit.create(memberAPI::class.java)
+                val callSaveMemberInfo = api.saveMemberInfo(memberInfo(id, pw, score))
 
                 callSaveMemberInfo.enqueue(object : Callback<memberInfo> {
-                    override fun onResponse(call: Call<memberInfo>, response: Response<memberInfo>) {
-                        Toast.makeText(view.context, "회원가입 성공!", Toast.LENGTH_LONG).show()
+                    override fun onResponse(
+                        call: Call<memberInfo>,
+                        response: Response<memberInfo>
+                    ) {
+                        var intent = Intent(this@SignupActivity, LoginActivity::class.java)
+                        startActivity(intent)
                         Log.d(ContentValues.TAG, "성공: ${response.raw()}")
                     }
 

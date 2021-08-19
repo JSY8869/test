@@ -9,7 +9,7 @@ import android.view.View
 import android.widget.EditText
 import android.widget.Toast
 import com.google.gson.GsonBuilder
-import com.ussu.memorydiary.API.API
+import com.ussu.memorydiary.API.memberAPI
 import com.ussu.memorydiary.API.memberInfo
 import retrofit2.Call
 import retrofit2.Callback
@@ -49,7 +49,7 @@ class LoginActivity : AppCompatActivity() {
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
 
-        val api = retrofit.create(API::class.java)
+        val api = retrofit.create(memberAPI::class.java)
         val callreadMemberInfo = api.readMemberInfo("$loginId")
 
         callreadMemberInfo.enqueue(object : Callback<memberInfo> {
@@ -61,13 +61,16 @@ class LoginActivity : AppCompatActivity() {
                     Toast.makeText(view.context, "$id, $pw", Toast.LENGTH_LONG).show()
 
                     if ((loginId == id) && (loginPw == pw)) { //로그인 성공
-                        Toast.makeText(view.context, "로그인 되었습니다", Toast.LENGTH_LONG).show()
                         var intent = Intent(this@LoginActivity, HomeActivity::class.java)
-                        intent.putExtra("id", "$loginId")
+                        intent.putExtra("id", "$id")
                         startActivity(intent)
                     } else { //id, password가 일치하지 않는 경우
-                        Toast.makeText(view.context, "id, password를 확인해주세요.", Toast.LENGTH_LONG).show()
+                        Toast.makeText(view.context, "id, password를 확인해주세요.", Toast.LENGTH_LONG)
+                            .show()
                     }
+                }
+                else {
+                    Toast.makeText(view.context, "body() = null", Toast.LENGTH_LONG).show()
                 }
             }
 

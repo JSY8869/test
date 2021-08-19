@@ -6,9 +6,8 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.TextView
-import android.widget.Toast
 import com.google.gson.GsonBuilder
-import com.ussu.memorydiary.API.API
+import com.ussu.memorydiary.API.diaryAPI
 import com.ussu.memorydiary.API.textInfo
 import retrofit2.Call
 import retrofit2.Callback
@@ -49,7 +48,7 @@ class DiaryActivity : AppCompatActivity() {
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
 
-        val api = retrofit.create(API::class.java)
+        val api = retrofit.create(diaryAPI::class.java)
         val callSaveDiaryText = api.saveDiaryText(textInfo("$loginId", "$date", "$text"))
 
         callSaveDiaryText.enqueue(object : Callback<textInfo> {
@@ -63,34 +62,34 @@ class DiaryActivity : AppCompatActivity() {
         })
     }
 
-    fun editDiaryText(view: View) {
-        val BASE_URL = "http://192.168.0.104:5000"
-        val date = intent.getStringExtra("date")
-        val loginId = intent.getStringExtra("id")
-        var text = diaryTextView.text.toString()
-
-        var gson = GsonBuilder()
-            .setLenient()
-            .create()
-
-        val retrofit = Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create(gson))
-            .build()
-
-        val api = retrofit.create(API::class.java)
-        val callEditDiaryText = api.editDiaryText("$loginId", (textInfo("$loginId", "$date", "$text")))
-
-        callEditDiaryText.enqueue(object : Callback<textInfo> {
-            override fun onResponse(call: Call<textInfo>, response: Response<textInfo>) {
-                Log.d(TAG, "성공: ${response.raw()}")
-            }
-
-            override fun onFailure(call: Call<textInfo>, t: Throwable) {
-                Log.d(TAG, "실패: $t")
-            }
-        })
-    }
+//    fun editDiaryText(view: View) {
+//        val BASE_URL = "http://192.168.0.104:5000"
+//        val date = intent.getStringExtra("date")
+//        val loginId = intent.getStringExtra("id")
+//        var text = diaryTextView.text.toString()
+//
+//        var gson = GsonBuilder()
+//            .setLenient()
+//            .create()
+//
+//        val retrofit = Retrofit.Builder()
+//            .baseUrl(BASE_URL)
+//            .addConverterFactory(GsonConverterFactory.create(gson))
+//            .build()
+//
+//        val api = retrofit.create(API::class.java)
+//        val callEditDiaryText = api.editDiaryText("$loginId", (textInfo("$loginId", "$date", "$text")))
+//
+//        callEditDiaryText.enqueue(object : Callback<textInfo> {
+//            override fun onResponse(call: Call<textInfo>, response: Response<textInfo>) {
+//                Log.d(TAG, "성공: ${response.raw()}")
+//            }
+//
+//            override fun onFailure(call: Call<textInfo>, t: Throwable) {
+//                Log.d(TAG, "실패: $t")
+//            }
+//        })
+//    }
 
     fun deleteDiaryText(view: View) {
         val BASE_URL = "http://192.168.0.104:5000"
@@ -105,7 +104,7 @@ class DiaryActivity : AppCompatActivity() {
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
 
-        val api = retrofit.create(API::class.java)
+        val api = retrofit.create(diaryAPI::class.java)
         val calldeleteDiaryText = api.deleteDiaryText("$loginId")
 
         calldeleteDiaryText.enqueue(object : Callback<textInfo> {
