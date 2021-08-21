@@ -45,10 +45,10 @@
                 android:text="수정" />
 
             <Button
+                android:id="@+id/btnDeleteText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="16dp"
-                android:onClick="deleteDiaryText"
                 android:text="삭제" />
 
         </LinearLayout>
