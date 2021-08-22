@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".HomeActivity">
+    tools:context=".GameVersionActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -13,38 +13,23 @@
         android:orientation="vertical"
         tools:ignore="MissingConstraints">
 
-<!--        <Button-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_marginTop="32dp"-->
-<!--            android:onClick="clickLogin"-->
-<!--            android:padding="16dp"-->
-<!--            android:text="로그인" />-->
-
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
-            android:onClick="clickDiary"
             android:padding="16dp"
-            android:text="일기" />
+            android:onClick="goV1"
+            android:text="v1" />
 
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:onClick="clickGame"
-            android:padding="16dp"
-            android:text="게임" />
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
             android:padding="16dp"
-            android:text="설정" />
+            android:onClick="goV2"
+            android:text="v2" />
 
     </LinearLayout>
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

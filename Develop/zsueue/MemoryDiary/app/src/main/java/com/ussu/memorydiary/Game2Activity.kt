@@ -17,7 +17,7 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-class GameActivity : AppCompatActivity() {
+class Game2Activity : AppCompatActivity() {
     private lateinit var AnswerEditText: EditText
     private lateinit var questionTextView: TextView
 
@@ -44,7 +44,7 @@ class GameActivity : AppCompatActivity() {
             .build()
 
         val api = retrofit.create(diaryAPI::class.java)
-        val callGetQuestionInfo = api.getAnswer(questionInfo("$id", "$date", "0", "0"))
+        val callGetQuestionInfo = api.getAnswer2(questionInfo("$id", "$date", "0", "0"))
 
         callGetQuestionInfo.enqueue(object : Callback<questionInfo> {
             override fun onResponse(call: Call<questionInfo>, response: Response<questionInfo>) {
@@ -63,9 +63,9 @@ class GameActivity : AppCompatActivity() {
 
                         //답 비교
                         if (answer == getAnswer) { //정답
-                            Toast.makeText(this@GameActivity, "정답입니다!", Toast.LENGTH_LONG).show()
+                            Toast.makeText(this@Game2Activity, "정답입니다!", Toast.LENGTH_LONG).show()
                         } else {
-                            Toast.makeText(this@GameActivity, "오답입니다! 다시 생각해보세요", Toast.LENGTH_LONG).show()
+                            Toast.makeText(this@Game2Activity, "오답입니다! 다시 생각해보세요", Toast.LENGTH_LONG).show()
                         }
                     }
                 }

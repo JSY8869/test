@@ -12,15 +12,15 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MemoryDiary"
         android:usesCleartextTraffic="true">
-        <activity android:name=".showCalendarActivity"></activity>
-        <activity android:name=".showDiaryActivity" />
+        <activity android:name=".Game2Activity"></activity>
+        <activity android:name=".GameVersionActivity" />
         <activity android:name=".GameCalendarActivity" />
         <activity android:name=".CalendarActivity" />
         <activity android:name=".GameActivity" />
         <activity android:name=".DiaryActivity" />
         <activity android:name=".SignupActivity" />
-        <activity android:name=".LoginActivity" />
-        <activity android:name=".HomeActivity">
+        <activity android:name=".HomeActivity" />
+        <activity android:name=".LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

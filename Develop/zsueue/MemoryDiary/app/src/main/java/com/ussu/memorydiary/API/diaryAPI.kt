@@ -27,5 +27,10 @@ interface diaryAPI {
     fun getAnswer(
         @Body dataClass: questionInfo
     ): Call<questionInfo>
+
+    @POST("/diary/Game2")
+    fun getAnswer2(
+        @Body dataClass: questionInfo
+    ): Call<questionInfo>
 }
 

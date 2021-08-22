@@ -5,28 +5,27 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 
-class HomeActivity : AppCompatActivity() {
+class GameVersionActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_home)
+        setContentView(R.layout.activity_game_version)
     }
 
-//    fun clickLogin(view: View) {
-//        var intent = Intent(this@HomeActivity, LoginActivity::class.java)
-//        startActivity(intent)
-//    }
-
-    fun clickDiary(view: View) {
+    fun goV1(view: View) {
         val id = intent.getStringExtra("id")
-        var intent = Intent(this@HomeActivity, CalendarActivity::class.java)
+        val date = intent.getStringExtra("date")
+        var intent = Intent(this@GameVersionActivity, GameActivity::class.java)
         intent.putExtra("id", "$id")
+        intent.putExtra("date", date)
         startActivity(intent)
     }
 
-    fun clickGame(view: View) {
+    fun goV2(view: View) {
         val id = intent.getStringExtra("id")
-        var intent = Intent(this@HomeActivity, GameCalendarActivity::class.java)
+        val date = intent.getStringExtra("date")
+        var intent = Intent(this@GameVersionActivity, Game2Activity::class.java)
         intent.putExtra("id", "$id")
+        intent.putExtra("date", date)
         startActivity(intent)
     }
 }

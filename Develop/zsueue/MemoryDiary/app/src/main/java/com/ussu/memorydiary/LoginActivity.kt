@@ -75,4 +75,9 @@ class LoginActivity : AppCompatActivity() {
             }
         })
     }
+
+    fun goSignup(view: View) {
+        var intent = Intent(this@LoginActivity, SignupActivity::class.java)
+        startActivity(intent)
+    }
 }

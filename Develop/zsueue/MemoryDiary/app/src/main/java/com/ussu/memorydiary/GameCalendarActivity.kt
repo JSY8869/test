@@ -20,7 +20,7 @@ class GameCalendarActivity : AppCompatActivity() {
         calendar.setOnDateChangeListener { view, year, month, dayOfMonth ->
             var month = month + 1
             val date = "$year-$month-$dayOfMonth"
-            var intent = Intent(this@GameCalendarActivity, GameActivity::class.java)
+            var intent = Intent(this@GameCalendarActivity, GameVersionActivity::class.java)
             intent.putExtra("id", "$id")
             intent.putExtra("date", date)
             startActivity(intent)
