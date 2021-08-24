@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".GameActivity">
+    tools:context=".Game2Activity">
 
 
     <LinearLayout
@@ -18,7 +18,8 @@
         <TextView
             android:id="@+id/textViewQuestion"
             android:layout_width="match_parent"
-            android:layout_height="32dp" />
+            android:layout_height="32dp"
+            android:text="어디에 다녀왔나요?" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -34,12 +35,41 @@
 
         </LinearLayout>
 
-        <Button
-            android:id="@+id/btnCheckAnswer"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="36dp"
-            android:text="결과 확인" />
+            android:gravity="center_horizontal">
+
+            <Button
+                android:id="@+id/btnCheckAnswer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="36dp"
+                android:text="결과 확인" />
+
+            <Button
+                android:id="@+id/btnSaveWhere"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="24dp"
+                android:layout_marginTop="36dp"
+                android:text="저장" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/showWarning"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="아래에서 장소와 관련된 단어를 찾아 입력해주세요."
+            android:visibility="invisible" />
+
+        <TextView
+            android:id="@+id/textViewGameText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp" />
     </LinearLayout>
 
 

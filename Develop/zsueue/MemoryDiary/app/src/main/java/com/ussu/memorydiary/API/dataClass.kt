@@ -19,5 +19,10 @@ data class questionInfo(
     var member_id: String,
     var created_at: String,
     var question: String,
-    var answer: String
+    var answer: String,
+    var game_text: String
+)
+
+data class gameText(
+    var game_text: String
 )
