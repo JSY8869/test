@@ -44,7 +44,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
                 android:hint="id"
-                android:inputType="textEmailAddress" />
+                android:inputType="textEmailAddress"
+                android:digits="abcdefghijklmnopqrstuvwxyz0123456789"/>
 
             <EditText
                 android:id="@+id/editTextTextPassword"
@@ -52,7 +53,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
                 android:hint="password"
-                android:inputType="textPassword" />
+                android:inputType="textPassword"
+                android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"/>
 
             <Button
                 android:id="@+id/button"
@@ -61,7 +63,8 @@
                 android:layout_marginTop="24dp"
                 android:onClick="clickLogin"
                 android:padding="16dp"
-                android:text="로그인" />
+                android:text="로그인"
+                android:textSize="?attr/mainTextSize"/>
 
             <Button
                 android:layout_width="wrap_content"
@@ -69,7 +72,8 @@
                 android:layout_marginTop="24dp"
                 android:padding="16dp"
                 android:onClick="goSignup"
-                android:text="회원가입 이동" />
+                android:text="회원가입 이동"
+                android:textSize="?attr/mainTextSize"/>
 
         </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>

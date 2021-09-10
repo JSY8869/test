@@ -11,8 +11,12 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.MemoryDiary"
+        android:windowSoftInputMode="stateAlwaysVisible"
         android:usesCleartextTraffic="true">
-        <activity android:name=".Game2Activity"></activity>
+        <activity android:name=".TextSizeActivity"></activity>
+        <activity android:name=".LocationActivity" />
+        <activity android:name=".ResultActivity" />
+        <activity android:name=".Game2Activity" />
         <activity android:name=".GameVersionActivity" />
         <activity android:name=".GameCalendarActivity" />
         <activity android:name=".CalendarActivity" />

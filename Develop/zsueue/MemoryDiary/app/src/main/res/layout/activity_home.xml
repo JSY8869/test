@@ -27,7 +27,8 @@
             android:layout_marginTop="32dp"
             android:onClick="clickDiary"
             android:padding="16dp"
-            android:text="일기" />
+            android:text="일기"
+            android:textSize="?attr/mainTextSize"/>
 
         <Button
             android:layout_width="wrap_content"
@@ -35,14 +36,17 @@
             android:layout_marginTop="32dp"
             android:onClick="clickGame"
             android:padding="16dp"
-            android:text="게임" />
+            android:text="게임"
+            android:textSize="?attr/mainTextSize"/>
 
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="32dp"
+            android:onClick="clickSetting"
             android:padding="16dp"
-            android:text="설정" />
+            android:text="설정"
+            android:textSize="?attr/mainTextSize"/>
 
     </LinearLayout>
 

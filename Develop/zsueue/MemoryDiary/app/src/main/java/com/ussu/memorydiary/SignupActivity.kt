@@ -17,7 +17,7 @@ import retrofit2.Response
 import retrofit2.Retrofit.*
 import retrofit2.converter.gson.GsonConverterFactory
 
-class SignupActivity : AppCompatActivity() {
+class SignupActivity : BaseActivity() {
 
     private lateinit var idEditText: EditText //나중에 값을 넣어주겠다
     private lateinit var pwEditText: EditText
@@ -57,7 +57,7 @@ class SignupActivity : AppCompatActivity() {
                     .build()
 
                 val api = retrofit.create(memberAPI::class.java)
-                val callSaveMemberInfo = api.saveMemberInfo(memberInfo(id, pw, score))
+                val callSaveMemberInfo = api.saveMemberInfo(memberInfo(id, pw, score, "0"))
 
                 callSaveMemberInfo.enqueue(object : Callback<memberInfo> {
                     override fun onResponse(call: Call<memberInfo>, response: Response<memberInfo>) {

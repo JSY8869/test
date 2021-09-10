@@ -3,11 +3,13 @@ package com.ussu.memorydiary
 import android.content.ContentValues.TAG
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.text.InputFilter
 import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import com.google.gson.GsonBuilder
@@ -18,8 +20,9 @@ import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.regex.Pattern
 
-class DiaryActivity : AppCompatActivity() {
+class DiaryActivity : BaseActivity() {
 
     private lateinit var dateTextView: TextView
     private lateinit var diaryEditText: EditText
@@ -31,12 +34,22 @@ class DiaryActivity : AppCompatActivity() {
         dateTextView = findViewById(R.id.textViewDate)
         diaryEditText = findViewById(R.id.EditTextDiary)
 
+        diaryEditText.setFilters(arrayOf(InputFilter { source, start, end, dest, dstart, dend ->
+            val ps: Pattern =
+                Pattern.compile("^[ㄱ-ㅣ가-힣 .?!]*$")
+            if (source == "" || ps.matcher(source).matches()) {
+                return@InputFilter source
+            } else {
+                Toast.makeText(this@DiaryActivity, "한글만 입력 가능합니다.", Toast.LENGTH_LONG).show()
+                ""
+            }
+        }))
+
         val date = intent.getStringExtra("date")
         dateTextView.text = "$date"
 
         val BASE_URL = "http://192.168.0.104:8080"
         val id = intent.getStringExtra("id")
-        var text = diaryEditText.text.toString()
 
         var gson = GsonBuilder()
             .setLenient()
@@ -48,7 +61,7 @@ class DiaryActivity : AppCompatActivity() {
             .build()
 
         val api = retrofit.create(diaryAPI::class.java)
-        val callReadDiaryText = api.readDiaryText(textInfo("$id", "$date", "0"))
+        val callReadDiaryText = api.readDiaryText(textInfo("$id", "$date", "0", 0))
 
         callReadDiaryText.enqueue(object : Callback<textInfo> {
             override fun onResponse(call: Call<textInfo>, response: Response<textInfo>) {
@@ -74,7 +87,7 @@ class DiaryActivity : AppCompatActivity() {
                             .build()
 
                         val api = retrofit.create(diaryAPI::class.java)
-                        val callDeleteDiaryText = api.deleteDiaryText(textInfo("$id", "$date", "$text"))
+                        val callDeleteDiaryText = api.deleteDiaryText(textInfo("$id", "$date", "$text", 0))
 
                         callDeleteDiaryText.enqueue(object : Callback<textInfo> {
                             override fun onResponse(call: Call<textInfo>, response: Response<textInfo>) {
@@ -97,7 +110,7 @@ class DiaryActivity : AppCompatActivity() {
                                         .build()
 
                                     val api = retrofit.create(diaryAPI::class.java)
-                                    val callSaveDiaryText = api.saveDiaryText(textInfo("$id", "$date", "$text"))
+                                    val callSaveDiaryText = api.saveDiaryText(textInfo("$id", "$date", "$text", 0))
 
                                     callSaveDiaryText.enqueue(object : Callback<textInfo> {
                                         override fun onResponse(call: Call<textInfo>, response: Response<textInfo>) {
@@ -143,7 +156,7 @@ class DiaryActivity : AppCompatActivity() {
 
                             val api = retrofit.create(diaryAPI::class.java)
                             val callSaveDiaryText =
-                                api.saveDiaryText(textInfo("$id", "$date", "$text"))
+                                api.saveDiaryText(textInfo("$id", "$date", "$text", 0))
 
                             callSaveDiaryText.enqueue(object : Callback<textInfo> {
                                 override fun onResponse(call: Call<textInfo>, response: Response<textInfo>) {
@@ -182,7 +195,7 @@ class DiaryActivity : AppCompatActivity() {
                             .build()
 
                         val api = retrofit.create(diaryAPI::class.java)
-                        val callSaveDiaryText = api.saveDiaryText(textInfo("$id", "$date", "$text"))
+                        val callSaveDiaryText = api.saveDiaryText(textInfo("$id", "$date", "$text", 0))
 
                         callSaveDiaryText.enqueue(object : Callback<textInfo> {
                             override fun onResponse(call: Call<textInfo>, response: Response<textInfo>) {

@@ -17,45 +17,53 @@
             android:id="@+id/textViewQuestion"
             android:layout_width="match_parent"
             android:layout_height="32dp"
-            android:text="어디에 다녀왔나요?" />
+            android:text="어디에 다녀왔나요?"
+            android:textSize="?attr/mainTextSize"/>
 
         <CheckBox
             android:id="@+id/CB0"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp" />
+            android:layout_marginTop="16dp"
+            android:textSize="?attr/mainTextSize"/>
 
         <CheckBox
             android:id="@+id/CB1"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:textSize="?attr/mainTextSize"/>
 
         <CheckBox
             android:id="@+id/CB2"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:textSize="?attr/mainTextSize"/>
 
         <CheckBox
             android:id="@+id/CB3"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:textSize="?attr/mainTextSize"/>
 
         <CheckBox
             android:id="@+id/CB4"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:textSize="?attr/mainTextSize"/>
 
         <CheckBox
             android:id="@+id/CB5"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:textSize="?attr/mainTextSize"/>
 
         <Button
             android:id="@+id/btnSaveWhere"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:text="저장" />
+            android:text="저장"
+            android:textSize="?attr/mainTextSize"/>
 
     </LinearLayout>
 

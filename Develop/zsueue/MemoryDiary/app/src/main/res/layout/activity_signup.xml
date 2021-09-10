@@ -43,7 +43,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
                 android:hint="아이디를 입력하세요"
-                android:inputType="textEmailAddress" />
+                android:inputType="textEmailAddress"
+                android:digits="abcdefghijklmnopqrstuvwxyz0123456789"/>
 
             <EditText
                 android:id="@+id/editTextTextPassword"
@@ -51,7 +52,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
                 android:hint="비밀번호를 입력하세요"
-                android:inputType="textPassword" />
+                android:inputType="textPassword"
+                android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"/>
 
             <Button
                 android:id="@+id/btnClickSignup"
@@ -60,7 +62,8 @@
                 android:layout_marginTop="24dp"
                 android:onClick="clickSignup"
                 android:padding="16dp"
-                android:text="회원가입" />
+                android:text="회원가입"
+                android:textSize="?attr/mainTextSize"/>
 
 
         </LinearLayout>

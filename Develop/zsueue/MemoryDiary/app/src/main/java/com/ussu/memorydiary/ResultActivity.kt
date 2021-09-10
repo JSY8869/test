@@ -1,12 +1,15 @@
 package com.ussu.memorydiary
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.ImageView
+import android.widget.Toast
 import com.ussu.memorydiary.R
 
-class ResultActivity : AppCompatActivity() {
+class ResultActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,32 +29,55 @@ class ResultActivity : AppCompatActivity() {
         //애니메이션 설정
         //scoreImage.startAnimation(scaleX2)
 
-        var score = 0
+        val score = intent.getIntExtra("score", 0)
 
-        if (score in 1..3) {
+        Toast.makeText(this, "$score", Toast.LENGTH_LONG).show()
+
+        if (score in 1..2) {
             scoreImage.setImageResource(R.drawable.leaf)
             scoreImage.startAnimation(scaleX2)
-        } else if (score in 3..5) {
+        } else if (score in 3..4) {
             scoreImage.setImageResource(R.drawable.leaf)
             scoreImage.startAnimation(scaleX3)
-        } else if (score in 5..8) {
+        } else if (score in 5..7) {
             scoreImage.setImageResource(R.drawable.leaf)
             scoreImage.startAnimation(scaleX4)
-        } else if (score in 8..10) {
+        } else if (score in 8..9) {
             scoreImage.setImageResource(R.drawable.leaf)
             scoreImage.startAnimation(scaleX5)
-        } else if (score in 10..30) {
+        } else if (score in 10..29) {
             scoreImage.setImageResource(R.drawable.flower)
             scoreImage.startAnimation(scaleX2)
-        } else if (score in 30..60) {
+        } else if (score in 30..59) {
             scoreImage.setImageResource(R.drawable.flower)
             scoreImage.startAnimation(scaleX3)
-        } else if (score in 60..90) {
+        } else if (score in 60..89) {
             scoreImage.setImageResource(R.drawable.flower)
             scoreImage.startAnimation(scaleX4)
-        } else if (score in 90..100) {
+        } else if (score in 90..99) {
             scoreImage.setImageResource(R.drawable.flower)
             scoreImage.startAnimation(scaleX5)
+        } else if (score in 100..199) {
+            scoreImage.setImageResource(R.drawable.tree)
+            scoreImage.startAnimation(scaleX2)
+        } else if (score in 200..299) {
+            scoreImage.setImageResource(R.drawable.tree)
+            scoreImage.startAnimation(scaleX3)
+        } else if (score in 300..399) {
+            scoreImage.setImageResource(R.drawable.tree)
+            scoreImage.startAnimation(scaleX4)
+        } else if (score in 400..500) {
+            scoreImage.setImageResource(R.drawable.tree)
+            scoreImage.startAnimation(scaleX5)
+        } else {
+            Toast.makeText(this, "score가 범위 안에 없습니다.", Toast.LENGTH_LONG).show()
         }
+    }
+
+    fun btnHome(view: View) {
+        var id = intent.getStringExtra("id")
+        var intent = Intent(this@ResultActivity, HomeActivity::class.java)
+        intent.putExtra("id", id)
+        startActivity(intent)
     }
 }

@@ -17,7 +17,7 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-class LoginActivity : AppCompatActivity() {
+class LoginActivity : BaseActivity() {
     private lateinit var idEditText: EditText //나중에 값을 넣어주겠다
     private lateinit var pwEditText: EditText
 
@@ -27,13 +27,17 @@ class LoginActivity : AppCompatActivity() {
 
         idEditText = findViewById(R.id.editTextTextId)
         pwEditText = findViewById(R.id.editTextTextPassword)
-
     }
 
     fun clickLogin(view: View) {
+
         //입력받은 loginId, loginPw
         var loginId = idEditText.text.toString()
         var loginPw = pwEditText.text.toString()
+
+//        var game_text = mutableListOf<String>("$loginId")
+//        game_text.add("$loginId")
+//        Toast.makeText(this, "$game_text", Toast.LENGTH_LONG).show()
 
         val BASE_URL = "http://192.168.0.104:8080"
 
@@ -47,7 +51,7 @@ class LoginActivity : AppCompatActivity() {
             .build()
 
         val api = retrofit.create(memberAPI::class.java)
-        val callreadMemberInfo = api.readMemberInfo(memberInfo("$loginId", "$loginPw", 0))
+        val callreadMemberInfo = api.readMemberInfo(memberInfo("$loginId", "$loginPw", 0, "0"))
 
         callreadMemberInfo.enqueue(object : Callback<memberInfo> {
             override fun onResponse(call: Call<memberInfo>, response: Response<memberInfo>) {
@@ -62,11 +66,10 @@ class LoginActivity : AppCompatActivity() {
                         intent.putExtra("id", "$id")
                         startActivity(intent)
                     } else { //id, password가 일치하지 않는 경우
-                        Toast.makeText(view.context, "id, pw를 다시 입력해주세요.", Toast.LENGTH_LONG)
-                            .show()
+                        Toast.makeText(view.context, "pw를 다시 입력해주세요.", Toast.LENGTH_LONG).show()
                     }
                 } else {
-                    Toast.makeText(view.context, "NULL", Toast.LENGTH_LONG).show()
+                    Toast.makeText(view.context, "id를 다시 입력해주세요.", Toast.LENGTH_LONG).show()
                 }
             }
 

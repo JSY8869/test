@@ -1,6 +1,7 @@
 package com.ussu.memorydiary
 
 import android.content.ContentValues
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -19,7 +20,7 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-class LocationActivity : AppCompatActivity() {
+class LocationActivity : BaseActivity() {
     private lateinit var CB0: CheckBox
     private lateinit var CB1: CheckBox
     private lateinit var CB2: CheckBox
@@ -30,6 +31,8 @@ class LocationActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_location)
+
+        val date = intent.getStringExtra("date")
 
         var id = intent.getStringExtra("id")
         val gameText = intent.getStringExtra("gameText")
@@ -149,10 +152,14 @@ class LocationActivity : AppCompatActivity() {
                             .build()
 
                         val api = retrofit.create(memberAPI::class.java)
-                        val callSaveScore = api.saveScore(memberInfo("$id", "0", score))
+                        val callSaveScore = api.saveScore(memberInfo("$id", "0", score, "$date"))
 
                         callSaveScore.enqueue(object : Callback<memberInfo> {
                             override fun onResponse(call: Call<memberInfo>, response: Response<memberInfo>) {
+                                var intent = Intent(this@LocationActivity, ResultActivity::class.java)
+                                intent.putExtra("id", id)
+                                intent.putExtra("score", score)
+                                startActivity(intent)
                             }
                             override fun onFailure(call: Call<memberInfo>, t: Throwable) {
                                 Log.d(ContentValues.TAG, "실패: $t")

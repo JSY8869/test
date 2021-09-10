@@ -18,4 +18,9 @@ interface memberAPI {
     fun readMemberInfo(
         @Body dataClass: memberInfo
     ): Call<memberInfo>
+
+    @POST("/game/score")
+    fun saveScore(
+        @Body dataClass: memberInfo
+    ): Call<memberInfo>
 }
