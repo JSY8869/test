@@ -1,218 +1,28 @@
-from konlpy.tag import Okt
-from tensorflow.keras.utils import get_file
+# -*- coding: utf-8 -*-
 from tensorflow.keras.preprocessing.sequence import pad_sequences
-from tensorflow.keras.utils import to_categorical
 import numpy as np
-from nltk import FreqDist
-from functools import reduce
-import os
-import re
-import matplotlib.pyplot as plt
-okt = Okt()
-TRAIN_FILE = os.path.join("about where/train_data.txt")
-TEST_FILE = os.path.join("about where/test_data.txt")
-i = 0
-lines = open(TRAIN_FILE , "rb")
-for line in lines:
-    line = line.decode("utf-8").strip()
-    i = i + 1
-    print(line)
-    if i == 20:
-      break
-def read_data(dir):
-    stories, questions, answers = [], [], [] # 각각 스토리, 질문, 답변을 저장할 예정
-    story_temp = [] # 현재 시점의 스토리 임시 저장
-    lines = open(dir, "rb")
-
-    for line in lines:
-        line = line.decode("utf-8") # b' 제거
-        line = line.strip() # '\n' 제거
-        idx, text = line.split(" ", 1) # 맨 앞에 있는 id number 분리
-        # 여기까지는 모든 줄에 적용되는 전처리
-
-        if int(idx) == 1:
-            story_temp = []
-
-        if "\t" in text: # 현재 읽는 줄이 질문 (tab) 답변 (tab)인 경우
-            question, answer, _ = text.split("\t") # 질문과 답변을 각각 저장
-            stories.append([x for x in story_temp if x]) # 지금까지의 누적 스토리를 스토리에 저장
-            questions.append(question)
-            answers.append(answer)
-
-        else: # 현재 읽는 줄이 스토리인 경우
-            story_temp.append(text) # 임시 저장
-
-    lines.close()
-    return stories, questions, answers
-train_data = read_data(TRAIN_FILE)
-test_data = read_data(TEST_FILE)
-train_stories, train_questions, train_answers = read_data(TRAIN_FILE)
-test_stories, test_questions, test_answers = read_data(TEST_FILE)
-def tokenize(sent):
-    return [ x.strip() for x in re.split('(\W+)?', sent) if x.strip()]
-def preprocess_data(train_data, test_data):
-    counter = FreqDist()
-
-    # 두 문장의 story를 하나의 문장으로 통합하는 함수
-    flatten = lambda data: reduce(lambda x, y: x + y, data)
-
-    # 각 샘플의 길이를 저장하는 리스트
-    story_len = []
-    question_len = []
-
-    for stories, questions, answers in [train_data, test_data]:
-        for story in stories:
-            stories = tokenize(flatten(story)) # 스토리의 문장들을 펼친 후 토큰화
-            story_len.append(len(stories)) # 각 story의 길이 저장
-            for word in stories: # 단어 집합에 단어 추가
-                counter[word] += 1
-        for question in questions:
-            question = tokenize(question)
-            question_len.append(len(question))
-            for word in question:
-                counter[word] += 1
-        for answer in answers:
-            answer = tokenize(answer)
-            for word in answer:
-                counter[word] += 1
-
-    # 단어 집합 생성
-    word2idx = {word : (idx + 1) for idx, (word, _) in enumerate(counter.most_common())}
-    idx2word = {idx : word for word, idx in word2idx.items()}
-
-    # 가장 긴 샘플의 길이
-    story_max_len = np.max(story_len)
-    question_max_len = np.max(question_len)
-
-    return word2idx, idx2word, story_max_len, question_max_len
-word2idx, idx2word, story_max_len, question_max_len = preprocess_data(train_data, test_data)
-vocab_size = len(word2idx) + 1
-def vectorize(data, word2idx, story_maxlen, question_maxlen):
-    Xs, Xq, Y = [], [], []
-    flatten = lambda data: reduce(lambda x, y: x + y, data)
-
-    stories, questions, answers = data
-    for story, question, answer in zip(stories, questions, answers):
-        xs = [word2idx[w] for w in tokenize(flatten(story))]
-        xq = [word2idx[w] for w in tokenize(question)]
-        Xs.append(xs)
-        Xq.append(xq)
-        Y.append(word2idx[answer])
-        # 스토리와 질문은 각각의 최대 길이로 패딩
-        # 정답은 원-핫 인코딩
-    return pad_sequences(Xs, maxlen=story_maxlen),\
-           pad_sequences(Xq, maxlen=question_maxlen),\
-           to_categorical(Y, num_classes=len(word2idx) + 1)
-Xstrain, Xqtrain, Ytrain = vectorize(train_data, word2idx, story_max_len, question_max_len)
-Xstest, Xqtest, Ytest = vectorize(test_data, word2idx, story_max_len, question_max_len)
-from tensorflow.keras.models import Sequential, Model
-from tensorflow.keras.layers import Embedding
-from tensorflow.keras.layers import Permute, dot, add, concatenate
-from tensorflow.keras.layers import LSTM, Dense, Dropout, Input, Activation
-# 에포크 횟수
-train_epochs = 120
-# 배치 크기
-batch_size = 32
-# 임베딩 크기
-embed_size = 50
-# LSTM의 크기
-lstm_size = 64
-# 과적합 방지 기법인 드롭아웃 적용 비율
-dropout_rate = 0.30
-input_sequence = Input((story_max_len,))
-question = Input((question_max_len,))
-
-# print('Stories :', input_sequence)
-# print('Question:', question)
-# 스토리를 위한 첫번째 임베딩. 그림에서의 Embedding A
-input_encoder_m = Sequential()
-input_encoder_m.add(Embedding(input_dim=vocab_size,
-                              output_dim=embed_size))
-input_encoder_m.add(Dropout(dropout_rate))
-# 결과 : (samples, story_max_len, embedding_dim) / 샘플의 수, 문장의 최대 길이, 임베딩 벡터의 차원
-
-# 스토리를 위한 두번째 임베딩. 그림에서의 Embedding C
-# 임베딩 벡터의 차원을 question_max_len(질문의 최대 길이)로 한다.
-input_encoder_c = Sequential()
-input_encoder_c.add(Embedding(input_dim=vocab_size,
-                              output_dim=question_max_len))
-input_encoder_c.add(Dropout(dropout_rate))
-# 결과 : (samples, story_max_len, question_max_len) / 샘플의 수, 문장의 최대 길이, 질문의 최대 길이(임베딩 벡터의 차원)
-# 질문을 위한 임베딩. 그림에서의 Embedding B
-question_encoder = Sequential()
-question_encoder.add(Embedding(input_dim=vocab_size,
-                               output_dim=embed_size,
-                               input_length=question_max_len))
-question_encoder.add(Dropout(dropout_rate))
+from tensorflow.keras.models import load_model
 
 
-input_encoded_m = input_encoder_m(input_sequence)
-input_encoded_c = input_encoder_c(input_sequence)
-question_encoded = question_encoder(question)
+def vectorize(story, word2idx):
+    story = story.split()
+    Xs = []
+    print(story)
+    for word in story:
+        if word in word2idx.keys():
+            Xs.append(word2idx[word])
+    print(idx2word[Xs[0]])
+    return pad_sequences([Xs], maxlen=30)
 
 
-match = dot([input_encoded_m, question_encoded], axes=-1, normalize=False)
-match = Activation('softmax')(match)
-print('Match shape', match)
-# 결과 : (samples, story_maxlen, question_max_len) / 샘플의 수, 문장의 최대 길이, 질문의 최대 길이
-
-# add the match matrix with the second input vector sequence
-response = add([match, input_encoded_c])  # (samples, story_max_len, question_max_len)
-response = Permute((2, 1))(response)  # (samples, question_max_len, story_max_len)
-print('Response shape', response)
-
-# concatenate the response vector with the question vector sequence
-answer = concatenate([response, question_encoded])
-print('Answer shape', answer)
-
-answer = LSTM(lstm_size)(answer)  # Generate tensors of shape 32
-answer = Dropout(dropout_rate)(answer)
-answer = Dense(vocab_size)(answer)  # (samples, vocab_size)
-# we output a probability distribution over the vocabulary
-answer = Activation('softmax')(answer)
-# build the final model
-model = Model([input_sequence, question], answer)
-model.compile(optimizer='rmsprop', loss='categorical_crossentropy',
-              metrics=['acc'])
-
-print(model.summary())
-
-# # start training the model
-# history = model.fit([Xstrain, Xqtrain],
-#          Ytrain, batch_size, train_epochs,
-#          validation_data=([Xstest, Xqtest], Ytest))
-
-# # save model
-# model.save('model.h5')
-# # plot accuracy and loss plot
-# plt.subplot(211)
-# plt.title("Accuracy")
-# plt.plot(history.history["acc"], color="g", label="train")
-# plt.plot(history.history["val_acc"], color="b", label="validation")
-# plt.legend(loc="best")
-
-# plt.subplot(212)
-# plt.title("Loss")
-# plt.plot(history.history["loss"], color="g", label="train")
-# plt.plot(history.history["val_loss"], color="b", label="validation")
-# plt.legend(loc="best")
-
-# plt.tight_layout()
-# plt.show()
-
-# # labels
-# ytest = np.argmax(Ytest, axis=1)
-
-# # get predictions
-# Ytest_ = model.predict([Xstest, Xqtest])
-# ytest_ = np.argmax(Ytest_, axis=1)
-# NUM_DISPLAY = 50
-
-# print("{:18}|{:5}|{}".format("질문", "실제값", "예측값"))
-# print(39 * "-")
-
-for i in range(NUM_DISPLAY):
-    question = " ".join([idx2word[x] for x in Xqtest[i].tolist()])
-    label = idx2word[ytest[i]]
-    prediction = idx2word[ytest_[i]]
-    print("{:20}: {:6} {}".format(question, label, prediction))
+word2idx = {'.': 1, '갔습니다': 2, '했습니다': 3, '이동했습니다': 4, '가버렸습니다': 5, '복귀했습니다': 6, '뛰어갔습니다': 7, '부엌으로': 8, '화장실로': 9, '복도로': 10, '정원으로': 11, '사무실로': 12, '침실로': 13, '쳤습니다': 14, '달리기를': 15, '복도': 16, '놀이공원에': 17, '경찰서를': 18, '부엌': 19, '청소를': 20, '화장실': 21, '워터파크로': 22, '수영을': 23, '정원': 24, '사무실': 25, '공부를': 26, '보육원으로': 27, '침실': 28, '사업을': 29, '목욕을': 30, '스도쿠를': 31, '이별을': 32, '소방서를': 33, '보드게임카페를': 34, '매장을': 35, '태권도장을': 36, '드라이브를': 37, '하키를': 38, '옥상으로': 39, '취업을': 40, '도박을': 41, '하키장으로': 42, '시장을': 43, '샤워를': 44, '터미널로': 45, '도박장을': 46, '스터디카페로': 47, '복싱을': 48, '노래를': 49, '불렀습니다': 50, '산책을': 51, '네일아트를': 52, '복싱장을': 53, '노래방으로': 54, '집으로': 55, '축구를': 56, '갔다': 57, '학교에': 58, '퇴사를': 59, '복도에': 60, '비트코인을': 61, '일을': 62, '볼링을': 63, '데이트를': 64, '쇼핑을': 65, '법원을': 66, '성형외과로': 67, '집을': 68, '게임을': 69, '운전을': 70, '골프를': 71, '계산을': 72, '헤어샵으로': 73, '일본을': 74, '1등을': 75, '당구를': 76, '결혼을': 77, '영국을': 78, '백화점에': 79, '수영장을': 80, '결혼식장을': 81, '연애를': 82, '요리를': 83, '춤을': 84, '췄습니다': 85, '뷔페를': 86, '마트를': 87, '유치장으로': 88, '헬스를': 89, '헬스장에': 90, '들어갔습니다': 91, '임신을': 92, '이사를': 93, '수업을': 94, '염색을': 95, '탈색을': 96, '유튜브를': 97, '레이싱을': 98, '승마를': 99, '배달을': 100, '입사를': 101, '진급을': 102, '이직을': 103, '포기를': 104, '제보를': 105, '제모를': 106, '밥을': 107, '먹었습니다': 108, '필기를': 109, '차로': 110, '탁구장을': 111, '강의실로': 112, '교실로': 113, '아르바이트를': 114, '입실을': 115, '퇴실을': 116, '김장을': 117, '트위터를': 118, '쾌변을': 119, '야구를': 120, '호텔을': 121, '모텔을': 122, '방송국에': 123, '카페를': 124, '세차장을': 125, '병원에': 126, '노래방을': 127, 'pc방을': 128, '학원을': 129, '콘서트장에': 130, '신문사를': 131, '야구장에': 132, '주식을': 133, '퇴사': 134, '거실로': 135, '설거지를': 136, '훈련을': 137, '보육원': 138, '달리기': 139, '술집으로': 140, '약국을': 141, '회사로': 142, '되돌아갔습니다': 143, '은행을': 144, '안과로': 145, '컴퓨터를': 146, '취직을': 147, '여행를': 148, '노래방': 149, '회사를': 150, '연습실을': 151, '군대로': 152, '해변에': 153, '한강에': 154, '핸드폰을': 155, '기싸움을': 156, '코딩을': 157, '계단으로': 158, '녹음실로': 159, '준비를': 160, '식사를': 161, '싸움을': 162, '농구를': 163, '마트': 164, '도박장': 165, '요리': 166, '도박': 167, '학교': 168, '게임': 169, '미국을': 170, '농구장으로': 171, '펜션을': 172, '식당을': 173, '이혼을': 174, '워터파크': 175, '경찰서': 176, '법원': 177, '노래': 178, '쇼핑': 179, '집': 180, '스터디카페': 181, '한강': 182, '한강3보육원으로': 183, '마라톤을': 184, '허밍를': 185, '소방서': 186, '보드게임카페': 187, '강의실': 188, '놀이공원': 189, '시장': 190, '공부': 191, '스도쿠': 192, '수업': 193, '취업': 194, '인사를': 195, '면도를': 196, '뷔페': 197, '복싱장': 198, '일본': 199, '결혼식장': 200, '목욕': 201, '연애': 202, '복싱': 203, '청소': 204, '계산': 205, '결혼': 206, '교무실로': 207, '욕실로': 208, '아파트로': 209, '농구장을': 210, '워터파크에': 211, '연습실로': 212, '영국': 213, '하키장': 214, '일': 215, '수영': 216, '1등': 217, '하키': 218, '침대로': 219, '잠을': 220, '잤습니다': 221, '농구장': 222, '옥상': 223, '미국': 224, '축구': 225, '드라이브': 226, '싸움': 227, '경찰서로': 228, '당구': 229, '보육원에': 230, '1보육원으로': 231, '노래방에': 232, '집에': 233, '학교로': 234, '돌아갔습니다': 235, '헤어샵에': 236, '호텔': 237, '수리를': 238, '회사': 239, '강남': 240, '임신': 241, '이사': 242, '이혼': 243, '수리': 244, '샤워': 245, '경찰서에': 246, '파마를': 247, '립싱크를': 248, '식당': 249, '카페': 250, '펜션': 251, '탁구장': 252, '거실': 253, '해변': 254, '은행': 255, '녹음실': 256, '헬스장': 257, '터미널': 258, '태권도장': 259, '교실': 260, '성형외과': 261, '유치장': 262, '수영장': 263, '안과': 264, '유튜브': 265, '염색': 266, '기싸움': 267, '데이트': 268, '인사': 269, '입사': 270, '입실': 271, '코딩': 272, '이직': 273, '설거지': 274, '여행': 275, '쾌변': 276, '식사': 277, '헬스': 278, '산책': 279, '볼링': 280, '이별': 281, '필기': 282, '비트코인': 283, '농구': 284, '춤': 285, '운전': 286, '사업': 287, '주식': 288, '매장': 289, '헤어샵': 290, '교무실': 291, '소방서에': 292, '한강으로': 293, '영화관에': 294, '소방서로': 295, '놀이공원으로': 296, '하키장에': 297, '강남에': 298, '방탈출카페를': 299, 'pc방에': 300, '카페에': 301, '태권도장에': 302, '신문사로': 303, '매장으로': 304, '방송국으로': 305, '복싱장에': 306, '마트로': 307, '수영장으로': 308, '백화점으로': 309, '군대에': 310, '터미널으로': 311, '화장실을': 312, '꼴등을': 313, '콘서트장': 314, '영화관': 315, '백화점': 316, '침대': 317, '욕실': 318, '신문사': 319, '방탈출카페': 320, '야구장': 321, '컴퓨터': 322, '승마': 323, '파마': 324, '골프': 325, '잠': 326, '면도': 327, '제보': 328, '립싱크': 329, '야구': 330, '네일아트': 331, '학원에': 332, '콘서트장을': 333, '타투를': 334, '모텔': 335, '타투샵': 336, '퇴실': 337, '타투': 338, '제모': 339, '마라톤': 340, '도박장으로': 341, '방송국': 342, '들어복귀했습니다': 343, '터미널에': 344, '콘서트장으로': 345, '세차장으로': 346, '타투샵에': 347, '은행에': 348, '야구장으로': 349, '수영장에': 350, '학원으로': 351, '병원을': 352, '들어이동했습니다': 353, '안과에': 354, '화장실에': 355, '해변으로': 356, '하키장을': 357, '1보육원에': 358, '유치장에': 359, '술집에': 360, '복싱장으로': 361, '되돌아복귀했습니다': 362, '되돌아': 363, '뷔페에': 364, '약국에': 365, '교실에': 366, '성형외과에': 367, '부엌에': 368, '보드게임카페에': 369, '헬스장을': 370, '들어뛰어갔습니다': 371, '헬스장으로': 372, '식당으로': 373, '농구장에': 374, '스터디카페에': 375, '탁구장에': 376, '병원으로': 377, '결혼식장으로': 378, '일본에': 379, '시장에': 380, '은행으로': 381, '신문사에': 382, '차에': 383, '세차장에': 384, '되돌아뛰어갔습니다': 385, '헤어샵을': 386, '학교를': 387, '호텔로': 388, '모텔에': 389, '펜션으로': 390, '약국으로': 391, '뷔페로': 392, '1보육원을': 393, '군대를': 394, '옥상에': 395, '도박장에': 396, '강의실에': 397, '마트에': 398, '성형외과를': 399, '회사에': 400, '돌아복귀했습니다': 401, '강남으로': 402, '방탈출카페로': 403, '술집을': 404, '화장실으로': 405, '강의실으로': 406, '워터파크를': 407, '들어갔다': 408, '보육원을': 409, '돌아이동했습니다': 410, '공장에': 411, '법원에': 412, '미국에': 413, '일본으로': 414, '결혼식장에': 415, '시장으로': 416, '보드게임카페로': 417, '교실으로': 418, '되돌아갔다': 419, '법원으로': 420, '아파트에': 421, '욕실을': 422, '영국으로': 423, '안과를': 424, '영화관으로': 425, '돌아뛰어갔습니다': 426, '공장': 427, '사무실에': 428, '타투샵으로': 429, '정원을': 430, '돌아갔다': 431, '미국으로': 432}
+idx2word = {1: '.', 2: '갔습니다', 3: '했습니다', 4: '이동했습니다', 5: '가버렸습니다', 6: '복귀했습니다', 7: '뛰어갔습니다', 8: '부엌으로', 9: '화장실로', 10: '복도로', 11: '정원으로', 12: '사무실로', 13: '침실로', 14: '쳤습니다', 15: '달리기를', 16: '복도', 17: '놀이공원에', 18: '경찰서를', 19: '부엌', 20: '청소를', 21: '화장실', 22: '워터파크로', 23: '수영을', 24: '정원', 25: '사무실', 26: '공부를', 27: '보육원으로', 28: '침실', 29: '사업을', 30: '목욕을', 31: '스도쿠를', 32: '이별을', 33: '소방서를', 34: '보드게임카페를', 35: '매장을', 36: '태권도장을', 37: '드라이브를', 38: '하키를', 39: '옥상으로', 40: '취업을', 41: '도박을', 42: '하키장으로', 43: '시장을', 44: '샤워를', 45: '터미널로', 46: '도박장을', 47: '스터디카페로', 48: '복싱을', 49: '노래를', 50: '불렀습니다', 51: '산책을', 52: '네일아트를', 53: '복싱장을', 54: '노래방으로', 55: '집으로', 56: '축구를', 57: '갔다', 58: '학교에', 59: '퇴사를', 60: '복도에', 61: '비트코인을', 62: '일을', 63: '볼링을', 64: '데이트를', 65: '쇼핑을', 66: '법원을', 67: '성형외과로', 68: '집을', 69: '게임을', 70: '운전을', 71: '골프를', 72: '계산을', 73: '헤어샵으로', 74: '일본을', 75: '1등을', 76: '당구를', 77: '결혼을', 78: '영국을', 79: '백화점에', 80: '수영장을', 81: '결혼식장을', 82: '연애를', 83: '요리를', 84: '춤을', 85: '췄습니다', 86: '뷔페를', 87: '마트를', 88: '유치장으로', 89: '헬스를', 90: '헬스장에', 91: '들어갔습니다', 92: '임신을', 93: '이사를', 94: '수업을', 95: '염색을', 96: '탈색을', 97: '유튜브를', 98: '레이싱을', 99: '승마를', 100: '배달을', 101: '입사를', 102: '진급을', 103: '이직을', 104: '포기를', 105: '제보를', 106: '제모를', 107: '밥을', 108: '먹었습니다', 109: '필기를', 110: '차로', 111: '탁구장을', 112: '강의실로', 113: '교실로', 114: '아르바이트를', 115: '입실을', 116: '퇴실을', 117: '김장을', 118: '트위터를', 119: '쾌변을', 120: '야구를', 121: '호텔을', 122: '모텔을', 123: '방송국에', 124: '카페를', 125: '세차장을', 126: '병원에', 127: '노래방을', 128: 'pc방을', 129: '학원을', 130: '콘서트장에', 131: '신문사를', 132: '야구장에', 133: '주식을', 134: '퇴사', 135: '거실로', 136: '설거지를', 137: '훈련을', 138: '보육원', 139: '달리기', 140: '술집으로', 141: '약국을', 142: '회사로', 143: '되돌아갔습니다', 144: '은행을', 145: '안과로', 146: '컴퓨터를', 147: '취직을', 148: '여행를', 149: '노래방', 150: '회사를', 151: '연습실을', 152: '군대로', 153: '해변에', 154: '한강에', 155: '핸드폰을', 156: '기싸움을', 157: '코딩을', 158: '계단으로', 159: '녹음실로', 160: '준비를', 161: '식사를', 162: '싸움을', 163: '농구를', 164: '마트', 165: '도박장', 166: '요리', 167: '도박', 168: '학교', 169: '게임', 170: '미국을', 171: '농구장으로', 172: '펜션을', 173: '식당을', 174: '이혼을', 175: '워터파크', 176: '경찰서', 177: '법원', 178: '노래', 179: '쇼핑', 180: '집', 181: '스터디카페', 182: '한강', 183: '한강3보육원으로', 184: '마라톤을', 185: '허밍를', 186: '소방서', 187: '보드게임카페', 188: '강의실', 189: '놀이공원', 190: '시장', 191: '공부', 192: '스도쿠', 193: '수업', 194: '취업', 195: '인사를', 196: '면도를', 197: '뷔페', 198: '복싱장', 199: '일본', 200: '결혼식장', 201: '목욕', 202: '연애', 203: '복싱', 204: '청소', 205: '계산', 206: '결혼', 207: '교무실로', 208: '욕실로', 209: '아파트로', 210: '농구장을', 211: '워터파크에', 212: '연습실로', 213: '영국', 214: '하키장', 215: '일', 216: '수영', 217: '1등', 218: '하키', 219: '침대로', 220: '잠을', 221: '잤습니다', 222: '농구장', 223: '옥상', 224: '미국', 225: '축구', 226: '드라이브', 227: '싸움', 228: '경찰서로', 229: '당구', 230: '보육원에', 231: '1보육원으로', 232: '노래방에', 233: '집에', 234: '학교로', 235: '돌아갔습니다', 236: '헤어샵에', 237: '호텔', 238: '수리를', 239: '회사', 240: '강남', 241: '임신', 242: '이사', 243: '이혼', 244: '수리', 245: '샤워', 246: '경찰서에', 247: '파마를', 248: '립싱크를', 249: '식당', 250: '카페', 251: '펜션', 252: '탁구장', 253: '거실', 254: '해변', 255: '은행', 256: '녹음실', 257: '헬스장', 258: '터미널', 259: '태권도장', 260: '교실', 261: '성형외과', 262: '유치장', 263: '수영장', 264: '안과', 265: '유튜브', 266: '염색', 267: '기싸움', 268: '데이트', 269: '인사', 270: '입사', 271: '입실', 272: '코딩', 273: '이직', 274: '설거지', 275: '여행', 276: '쾌변', 277: '식사', 278: '헬스', 279: '산책', 280: '볼링', 281: '이별', 282: '필기', 283: '비트코인', 284: '농구', 285: '춤', 286: '운전', 287: '사업', 288: '주식', 289: '매장', 290: '헤어샵', 291: '교무실', 292: '소방서에', 293: '한강으로', 294: '영화관에', 295: '소방서로', 296: '놀이공원으로', 297: '하키장에', 298: '강남에', 299: '방탈출카페를', 300: 'pc방에', 301: '카페에', 302: '태권도장에', 303: '신문사로', 304: '매장으로', 305: '방송국으로', 306: '복싱장에', 307: '마트로', 308: '수영장으로', 309: '백화점으로', 310: '군대에', 311: '터미널으로', 312: '화장실을', 313: '꼴등을', 314: '콘서트장', 315: '영화관', 316: '백화점', 317: '침대', 318: '욕실', 319: '신문사', 320: '방탈출카페', 321: '야구장', 322: '컴퓨터', 323: '승마', 324: '파마', 325: '골프', 326: '잠', 327: '면도', 328: '제보', 329: '립싱크', 330: '야구', 331: '네일아트', 332: '학원에', 333: '콘서트장을', 334: '타투를', 335: '모텔', 336: '타투샵', 337: '퇴실', 338: '타투', 339: '제모', 340: '마라톤', 341: '도박장으로', 342: '방송국', 343: '들어복귀했습니다', 344: '터미널에', 345: '콘서트장으로', 346: '세차장으로', 347: '타투샵에', 348: '은행에', 349: '야구장으로', 350: '수영장에', 351: '학원으로', 352: '병원을', 353: '들어이동했습니다', 354: '안과에', 355: '화장실에', 356: '해변으로', 357: '하키장을', 358: '1보육원에', 359: '유치장에', 360: '술집에', 361: '복싱장으로', 362: '되돌아복귀했습니다', 363: '되돌아', 364: '뷔페에', 365: '약국에', 366: '교실에', 367: '성형외과에', 368: '부엌에', 369: '보드게임카페에', 370: '헬스장을', 371: '들어뛰어갔습니다', 372: '헬스장으로', 373: '식당으로', 374: '농구장에', 375: '스터디카페에', 376: '탁구장에', 377: '병원으로', 378: '결혼식장으로', 379: '일본에', 380: '시장에', 381: '은행으로', 382: '신문사에', 383: '차에', 384: '세차장에', 385: '되돌아뛰어갔습니다', 386: '헤어샵을', 387: '학교를', 388: '호텔로', 389: '모텔에', 390: '펜션으로', 391: '약국으로', 392: '뷔페로', 393: '1보육원을', 394: '군대를', 395: '옥상에', 396: '도박장에', 397: '강의실에', 398: '마트에', 399: '성형외과를', 400: '회사에', 401: '돌아복귀했습니다', 402: '강남으로', 403: '방탈출카페로', 404: '술집을', 405: '화장실으로', 406: '강의실으로', 407: '워터파크를', 408: '들어갔다', 409: '보육원을', 410: '돌아이동했습니다', 411: '공장에', 412: '법원에', 413: '미국에', 414: '일본으로', 415: '결혼식장에', 416: '시장으로', 417: '보드게임카페로', 418: '교실으로', 419: '되돌아갔다', 420: '법원으로', 421: '아파트에', 422: '욕실을', 423: '영국으로', 424: '안과를', 425: '영화관으로', 426: '돌아뛰어갔습니다', 427: '공장', 428: '사무실에', 429: '타투샵으로', 430: '정원을', 431: '돌아갔다', 432: '미국으로'}
+Xstest = vectorize('미국으로 갔습니다 그리고 집에 돌아와 밥을 먹었다 너무너무 재미 있었다 그리고 은행으로 이동했습니다', word2idx)
+print(Xstest)
+# get predictions
+model = load_model('model.h5')
+Ytest_ = model.predict([Xstest])
+ytest_ = np.argmax(Ytest_, axis=1)
+print("{:6}".format("답"))
+prediction = idx2word[ytest_[0]]
+print("{:6}".format(prediction))
